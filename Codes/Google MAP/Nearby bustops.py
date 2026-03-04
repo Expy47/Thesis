@@ -2,7 +2,7 @@ import openpyxl
 import googlemaps
 
 # Your Google Maps API Key
-API_KEY = 'AIzaSyCeEKS8yluVIAFWkO_DZwcs0oVJqovSRHc'
+API_KEY = 'API_KEY'
 
 # Initialize the Google Maps client
 gmaps = googlemaps.Client(key=API_KEY)
@@ -50,3 +50,4 @@ for row in range(2, sheet.max_row + 1):
 wb.save(file_path)
 
 print("Process completed successfully!")
+
