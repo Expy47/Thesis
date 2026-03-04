@@ -1,4 +1,4 @@
-# Thesis
+# Academic Thesis
 All the codes related to my academic thesis are uploaded here.
 
 The python codes are used to find the mode specifics travel time and travel distance between user specified location to their access or egress metro station and also to find the bus stop near to their locations.
