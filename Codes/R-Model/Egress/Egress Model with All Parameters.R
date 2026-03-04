@@ -1,0 +1,420 @@
+
+# ################################################################# #
+#### LOAD LIBRARY AND DEFINE CORE SETTINGS                       ####
+# ################################################################# #
+
+setwd("G:\\4-2\\CE-400\\Analysis\\R-Model\\Models and Results (Junaid & Nusrat)\\Models and Results (Junaid & Nusrat)\\Egress")
+
+### Clear memory
+rm(list = ls())
+
+### Load Apollo library
+library(apollo)
+
+### Initialise code
+apollo_initialise()
+
+### Set core controls
+apollo_control = list(
+  modelName       = "MNL_EGRESS_BigModel_Correction",
+  modelDescr      = "Simple MNLtotal model on mode choice egress data - for bus, rick, walk",
+  indivID         = "ID", 
+  outputDirectory = "Total_Model_Estimates_Egress"
+)
+
+# ################################################################# #
+#### LOAD DATA AND APPLY ANY TRANSFORMATIONS                     ####
+# ################################################################# #
+
+### Loading data from package
+### if data is to be loaded from a file (e.g. called data.csv), 
+database = read.csv("G:/4-2/CE-400/Analysis/R-Model/Models and Results (Junaid & Nusrat)/Models and Results (Junaid & Nusrat)/Egress/ENCODED_EGRESS_s1+s2_sorted.csv",header=TRUE)
+
+#Filtering only rick, walk, bus chosen data
+database = subset(database, eg_mode %in% c(1, 2, 7))
+database$eg_comp = ((database$ec1==1) | (database$ec2==1) | (database$ec3==1) | (database$ec4==1))
+#database$age = ((database$age==20)*1 + (database$age==30)*2 + (database$age==40)*3 + (database$age==60)*4 + (database$age==70)*5)
+database$month_inc = ((database$month_inc==5)*5 +(database$month_inc==20)*20 + (database$month_inc==30)*30 + (database$month_inc==60)*60 + ((database$month_inc==80) | (database$month_inc==150) | (database$month_inc==250))*80)
+database$age = ((database$age == 20)*20 + (database$age == 30)*30 + (database$age == 40)*40 + ((database$age == 60) | (database$age == 70))*60)
+#database = apollo_modeChoiceData
+### for data dictionary, use ?apollo_modeChoiceData
+
+
+# ################################################################# #
+#### DEFINE MODEL PARAMETERS                                     ####
+# ################################################################# #
+
+### Vector of parameters, including any that are kept fixed in estimation
+apollo_beta = c(
+  
+              asc_walk  = 0,
+              asc_rick  = 0,
+              asc_bus   = 0,
+              
+              
+              b_tt_walk = 0,
+              #b_tt_rick = 0,
+              b_tt_bus  = 0,
+              
+              b_cost_rick = 0,
+              b_cost_bus = 0,
+              
+              #b_11am_walk = 0,
+              #b_1pm_walk = 0,
+              #b_3pm_walk = 0,
+              #b_5pm_walk = 0,
+              #b_7pm_walk = 0,
+              
+              b_11am_rick = 0,
+              b_1pm_rick = 0,
+              b_3pm_rick = 0,
+              b_5pm_rick = 0,
+              b_7pm_rick = 0,
+              
+              b_11am_bus = 0,
+              b_1pm_bus = 0,
+              b_3pm_bus = 0,
+              b_5pm_bus = 0,
+              b_7pm_bus = 0,
+              
+              b_st_moti_rick= 0,
+              #b_st_secr_rick = 0,
+              b_st_du_rick = 0,
+              b_st_shbg_rick = 0,
+              b_st_karbz_rick = 0,
+              b_st_farm_ricK = 0,
+              #b_st_bjsrn_rick = 0,
+              b_st_agar_rick = 0,
+              #b_st_shew_rick = 0,
+              #b_st_kazi_rick = 0,
+              b_st_mir10_rick = 0,
+              b_st_mir11_rick = 0,
+              b_st_pllb_rick = 0,
+              #b_st_us_rick = 0,
+              #b_st_uc_rick = 0,
+              b_st_un_rick =0,
+              
+              b_st_moti_bus= 0,
+              #b_st_secr_bus = 0,
+              b_st_du_bus = 0,
+              b_st_shbg_bus = 0,
+              b_st_karbz_bus = 0,
+              b_st_farm_bus = 0,
+              #b_st_bjsrn_bus = 0,
+              b_st_agar_bus = 0,
+              #b_st_shew_bus = 0,
+              #b_st_kazi_bus = 0,
+              b_st_mir10_bus = 0,
+              b_st_mir11_bus = 0,
+              b_st_pllb_bus = 0,
+              #b_st_us_bus = 0,
+              #b_st_uc_bus = 0,
+              b_st_un_bus =0,
+              
+              #b_dist_car = 0,
+              #b_dist_bus = 0,
+              #b_dist_rick = 0,
+              #b_dist_walk = 0,
+              #b_dist_bike = 0,
+              
+              #b_tp_business_walk = 0,
+              #b_tp_edu_walk = 0,
+              #b_tp_medi_walk = 0,
+              #b_tp_job_walk = 0,
+              #b_tp_pw_walk = 0,
+              #b_tp_rec_walk = 0,
+              #b_tp_rtrn_walk = 0,
+              #b_tp_shop_walk = 0,
+              
+              b_tp_business_rick = 0,
+              b_tp_edu_rick = 0,
+              b_tp_medi_rick = 0,
+              b_tp_job_rick = 0,
+              #b_tp_pw_rick = 0,
+              b_tp_rec_rick = 0,
+              b_tp_rtrn_rick = 0,
+              #b_tp_shop_rick = 0,
+              
+              b_tp_business_bus = 0,
+              b_tp_edu_bus = 0,
+              b_tp_medi_bus = 0,
+              b_tp_job_bus = 0,
+              #b_tp_pw_bus = 0,
+              b_tp_rec_bus = 0,
+              b_tp_rtrn_bus = 0,
+              #b_tp_shop_bus = 0,
+              
+              #b_TF1_walk = 0,
+              #b_TF2_walk = 0,
+              #b_TF3_walk = 0,
+              #b_TF4_walk = 0,
+              #b_TF5_walk = 0,
+              
+              b_TF1_rick = 0,
+              b_TF2_rick = 0,
+              b_TF3_rick = 0,
+              b_TF4_rick = 0,
+              b_TF5_rick = 0,
+              #b_TF6_rick = 0,
+              
+              b_TF1_bus = 0,
+              b_TF2_bus = 0,
+              b_TF3_bus = 0,
+              b_TF4_bus = 0,
+              b_TF5_bus = 0,
+              #b_TF6_bus = 0,
+              
+              #b_freq_bus = 0,
+              
+              #b_bag_walk = 0,
+              #b_obag_walk = 0,
+              #b_shpbag_walk = 0,
+              #b_lugg_walk = 0,
+              #b_other_walk = 0,
+              
+              b_bag_rick = 0,
+              b_obag_rick = 0,
+              b_shpbag_rick = 0,
+              #b_lugg_rick = 0,
+              b_other_rick = 0,
+              
+              b_bag_bus = 0,
+              b_obag_bus = 0,
+              b_shpbag_bus = 0,
+              #b_lugg_bus = 0,
+              b_other_bus = 0,
+              
+              
+              #b_comp_walk = 0,
+              b_comp_rick = 0,
+              b_comp_bus = 0,
+              
+              #b_gp_business_walk = 0,
+              #b_gp_edu_walk = 0,
+              #b_gp_medi_walk = 0,
+              #b_gp_job_walk = 0,
+              #b_gp_pw_walk = 0,
+              #b_gp_rec_walk = 0,
+              #b_gp_shop_walk = 0,
+              
+              b_gp_business_rick = 0,
+              b_gp_edu_rick = 0,
+              b_gp_medi_rick = 0,
+              b_gp_job_rick = 0,
+              #b_gp_pw_rick = 0,
+              b_gp_rec_rick = 0,
+              b_gp_shop_rick = 0,
+              
+              b_gp_business_bus = 0,
+              b_gp_edu_bus = 0,
+              b_gp_medi_bus = 0,
+              b_gp_job_bus = 0,
+              #b_gp_pw_bus = 0,
+              b_gp_rec_bus = 0,
+              b_gp_shop_bus = 0,
+              
+              #b_age1_walk = 0,
+              #b_age2_walk = 0,
+              #b_age3_walk = 0,
+              #b_age4_walk = 0,
+              #b_age5_walk = 0,
+              
+              b_age1_rick = 0,
+              b_age2_rick = 0,
+              b_age3_rick = 0,
+              #b_age4_rick = 0,
+              #b_age5_rick = 0,
+              
+              b_age1_bus = 0,
+              b_age2_bus = 0,
+              b_age3_bus = 0,
+              #b_age4_bus = 0,
+              #b_age5_bus = 0,
+              
+              #b_fmale_walk = 0,
+              b_fmale_rick = 0,
+              b_fmale_bus = 0,
+              
+              #b_stud_walk = 0,
+              #b_hwife_walk = 0,
+              #b_gov_walk = 0,
+              #b_pvt_walk = 0,
+              #b_bzman_walk = 0,
+              #b_rtd_walk = 0,
+              #b_unemp_walk = 0,
+              
+              b_stud_rick = 0,
+              b_hwife_rick = 0,
+              b_gov_rick = 0,
+              b_pvt_rick = 0,
+              b_bzman_rick = 0,
+              b_rtd_rick = 0,
+              #b_unemp_rick = 0,
+              
+              b_stud_bus = 0,
+              b_hwife_bus = 0,
+              b_gov_bus = 0,
+              b_pvt_bus = 0,
+              b_bzman_bus = 0,
+              b_rtd_bus = 0,
+              #b_unemp_bus = 0,
+              
+              #b_inc1_walk = 0,
+              #b_inc2_walk = 0,
+              #b_inc3_walk = 0,
+              #b_inc4_walk = 0,
+              #b_inc5_walk = 0,
+              #b_inc6_walk = 0,
+              #b_inc7_walk = 0,
+              
+              #b_inc1_rick = 0,
+              b_inc2_rick = 0,
+              b_inc3_rick = 0,
+              b_inc4_rick = 0,
+              b_inc5_rick = 0,
+              #b_inc6_rick = 0,
+              #b_inc7_rick = 0,
+              
+              #b_inc1_bus = 0,
+              b_inc2_bus = 0,
+              b_inc3_bus = 0,
+              b_inc4_bus = 0,
+              b_inc5_bus = 0,
+              #b_inc6_bus = 0,
+              #b_inc7_bus = 0,
+              
+              #b_own_car_walk = 0,
+              #b_own_bike_walk = 0,
+              #b_own_cyc_walk = 0,
+              
+              b_own_car_rick = 0,
+              b_own_bike_rick = 0,
+              b_own_cyc_rick = 0,
+              
+              b_own_car_bus = 0,
+              b_own_bike_bus = 0,
+              b_own_cyc_bus = 0,
+              
+              #b_mrt_walk = 0,
+              b_mrt_rick = 0,
+              b_mrt_bus = 0
+  
+)
+
+### Vector with names (in quotes) of parameters to be kept fixed at their starting value in apollo_beta, use apollo_beta_fixed = c() if none
+apollo_fixed = c("asc_walk")
+
+# ################################################################# #
+#### GROUP AND VALIDATE INPUTS                                   ####
+# ################################################################# #
+
+apollo_inputs = apollo_validateInputs()
+
+# ################################################################# #
+#### DEFINE MODEL AND LIKELIHOOD FUNCTION                        ####
+# ################################################################# #
+
+apollo_probabilities=function(apollo_beta, apollo_inputs, functionality="estimate") {
+  
+  ### Attach inputs and detach after function exit
+  apollo_attach(apollo_beta, apollo_inputs)
+  on.exit(apollo_detach(apollo_beta, apollo_inputs))
+  
+  ### Create list of probabilities P
+  P = list()
+  
+  ### List of utilities: these must use the same names as in mnl_settings, order is irrelevant
+  V = list()
+  
+  #V[["car"]]  = asc_car + b_tt_car * car_tt+ b_dist_car * car_dist + b_cost * car_cost
+  
+  V[["walk"]] = asc_walk + b_tt_walk * walk_tt                           #+ # + b_dist_walk * walk_dist +
+                #b_tp_business_walk*(trip_purp==1) + 
+                #b_tp_edu_walk*(trip_purp==2) + b_tp_medi_walk*(trip_purp==3) + b_tp_job_walk*(trip_purp==4) + b_tp_rec_walk*(trip_purp==6) + b_tp_rtrn_walk*(trip_purp==7) + #b_tp_shop_walk*(trip_purp==8) +
+                #b_gp_business_walk*(gen_purp==1) + b_gp_edu_walk*(gen_purp==2) + b_gp_medi_walk*(gen_purp==3) + b_gp_job_walk*(gen_purp==4) + b_gp_rec_walk*(gen_purp==6) + b_gp_shop_walk*(gen_purp==8) +
+                #b_TF1_walk*(trip_freq==1) + b_TF2_walk*(trip_freq==2) + b_TF3_walk*(trip_freq==3) + b_TF4_walk*(trip_freq==4) + b_TF5_walk*(trip_freq==5) + 
+                #b_bag_walk*b1 + b_obag_walk*b2 + b_shpbag_walk*b4 + b_other_walk*b5 + #b_lugg_walk*b3
+                #b_comp_walk*eg_comp + 
+                #b_age1_walk * (age==20) + b_age2_walk * (age==30)+ b_age3_walk * (age==40) + #b_age4_walk * (age==60)
+                #b_fmale_walk*(gen==1) +
+                #b_stud_walk*(occ==1) + b_hwife_walk*(occ==2) + b_gov_walk*(occ==3) + b_pvt_walk*(occ==4) + b_bzman_walk*(occ==5) + b_unemp_walk*(occ==7) +
+                #b_inc1_walk*(month_inc==5) + b_inc2_walk*(month_inc==20) + b_inc3_walk*(month_inc==30) + #+ b_inc4_walk*(month_inc==60) + #+ b_inc5_walk*(month_inc==80) + b_inc6_walk*(month_inc==150)
+                #b_own_car_walk*veh_own_car + b_own_bike_walk*veh_own_bike + b_own_cyc_walk*veh_own_cyc + 
+                #b_mrt_walk*mrt_pass
+  
+  V[["rick"]] = asc_rick + b_cost_rick * rick_cost +  #b_tt_rick * rick_tt #  b_dist_walk * walk_dist + b_dist_rick * rick_dist
+                b_11am_rick*(surv_t==2) + b_1pm_rick*(surv_t==3) + b_3pm_rick*(surv_t==4) + b_5pm_rick*(surv_t==5) + b_7pm_rick*(surv_t==6) +
+                b_st_moti_rick*(eg_st==16) + b_st_du_rick*(eg_st==14) + b_st_shbg_rick*(eg_st==13) + b_st_karbz_rick*(eg_st==12) + b_st_farm_ricK*(eg_st==11) + 
+                b_st_agar_rick*(eg_st==9) + b_st_mir10_rick*(eg_st==6) + b_st_mir11_rick*(eg_st==5) + b_st_pllb_rick*(eg_st==4) + b_st_un_rick*(eg_st==1) +
+                b_tp_business_rick*(trip_purp==1) + b_tp_edu_rick*(trip_purp==2) + b_tp_medi_rick*(trip_purp==3) + b_tp_job_rick*(trip_purp==4) + b_tp_rec_rick*(trip_purp==6) + b_tp_rtrn_rick*(trip_purp==7) + #b_tp_shop_rick*(trip_purp==8)+ 
+                b_gp_business_rick*(gen_purp==1) +b_gp_edu_rick*(gen_purp==2) + b_gp_medi_rick*(gen_purp==3) + b_gp_job_rick*(gen_purp==4) + b_gp_rec_rick*(gen_purp==6) + b_gp_shop_rick*(gen_purp==8) +
+                b_TF1_rick*(trip_freq==1) + b_TF2_rick*(trip_freq==2) + b_TF3_rick*(trip_freq==3) + b_TF4_rick*(trip_freq==4) + b_TF5_rick*(trip_freq==5) + #b_TF6_rick*(trip_freq==6) +
+                b_bag_rick*b1 + b_obag_rick*b2 + b_shpbag_rick*b4 + b_other_rick*b5 + #b_lugg_rick*b3
+                b_comp_rick*eg_comp + 
+                b_age1_rick * (age==20) + b_age2_rick * (age==30) + b_age3_rick * (age==40) + #b_age4_rick * (age==60)
+                b_fmale_rick*(gen==1)+ 
+                b_stud_rick*(occ==1) + b_hwife_rick*(occ==2) + b_gov_rick*(occ==3) + b_pvt_rick*(occ==4) + b_bzman_rick*(occ==5) + b_rtd_rick*(occ==6) + #b_unemp_rick*(occ==7) +
+                b_inc2_rick*(month_inc==20) + b_inc3_rick*(month_inc==30) + b_inc4_rick*(month_inc==60) + b_inc5_rick*(month_inc==80) + #b_inc6_walk*(month_inc==150)
+                b_own_car_rick*veh_own_car + b_own_bike_rick*veh_own_bike + b_own_cyc_rick*veh_own_cyc +
+                b_mrt_rick*mrt_pass
+  
+  V[["bus"]]  = asc_bus + b_tt_bus * bus_tt + b_cost_bus * bus_cost + # b_dist_bus * bus_dist + b_dist_bus * bus_dist+
+                b_11am_bus*(surv_t==2) + b_1pm_bus*(surv_t==3) + b_3pm_bus*(surv_t==4) + b_5pm_bus*(surv_t==5) + b_7pm_bus*(surv_t==6) +
+                b_st_moti_bus*(eg_st==16) + b_st_du_bus*(eg_st==14) + b_st_shbg_bus*(eg_st==13) + b_st_karbz_bus*(eg_st==12) + b_st_farm_bus*(eg_st==11) + 
+                b_st_agar_bus*(eg_st==9) + b_st_mir10_bus*(eg_st==6) + b_st_mir11_bus*(eg_st==5) + b_st_pllb_bus*(eg_st==4) + b_st_un_bus*(eg_st==1) +
+                b_tp_business_bus*(trip_purp==1) + b_tp_edu_bus*(trip_purp==2) + b_tp_medi_bus*(trip_purp==3) + b_tp_job_bus*(trip_purp==4) + b_tp_rec_bus*(trip_purp==6) + b_tp_rtrn_bus*(trip_purp==7) + #b_tp_shop_bus*(trip_purp==8) +
+                b_gp_business_bus*(gen_purp==1) + b_gp_edu_bus*(gen_purp==2) + b_gp_medi_bus*(gen_purp==3) + b_gp_job_bus*(gen_purp==4) + b_gp_rec_bus*(gen_purp==6) + b_gp_shop_bus*(gen_purp==8) + #b_gp_pw_bus*(gen_purp==5)+
+                b_TF1_bus*(trip_freq==1) + b_TF2_bus*(trip_freq==2) + b_TF3_bus*(trip_freq==3) + b_TF4_bus*(trip_freq==4) + b_TF5_bus*(trip_freq==5) + #b_TF6_bus*(trip_freq==6) +
+                b_bag_bus*b1 + b_obag_bus*b2 + b_shpbag_bus*b4 + b_other_bus*b5 + #b_lugg_bus*b3 
+                b_comp_bus*eg_comp +  
+                b_age1_bus*(age==20) + b_age2_bus*(age==30) + b_age3_bus*(age==40) + #b_age4_bus*(age==60)
+                b_fmale_bus*(gen==1) +
+                b_stud_bus*(occ==1) + b_hwife_bus*(occ==2) + b_gov_bus*(occ==3) + b_pvt_bus*(occ==4) + b_bzman_bus*(occ==5) + b_rtd_bus*(occ==6)+ #b_unemp_bus*(occ==7) +
+                b_inc2_bus*(month_inc==20) + b_inc3_bus*(month_inc==30) + b_inc4_bus*(month_inc==60) + + b_inc5_bus*(month_inc==80) + #b_inc6_bus*(month_inc==150)
+                b_own_car_bus*veh_own_car + b_own_bike_bus*veh_own_bike + b_own_cyc_bus*veh_own_cyc +
+                b_mrt_bus*mrt_pass
+  
+ # V[["bike"]] = asc_bike + b_tt_bike * bike_tt + b_dist_bike * bike_dist + b_cost * bike_cost
+ # V[["cng"]]  = asc_cng + b_tt_cng * cng_tt + b_dist_cng * cng_dist + b_cost * cng_cost
+  #V[["legu"]] = asc_leg + b_tt_leg * leg_tt + b_dist_leg * leg_dist + b_cost * leg_cost
+
+  ### Define settings for MNL model component
+  mnl_settings = list(
+    alternatives  = c(walk=1, rick=2, bus=7), 
+    avail         = list(walk=walk_av, bus=bus_av, rick=rick_av), 
+    choiceVar     = eg_mode,
+    utilities     = V
+  )
+  
+  ### Compute probabilities using MNL model
+  P[["model"]] = apollo_mnl(mnl_settings, functionality)
+  
+  ### Take product across observation for same individual
+ # P = apollo_panelProd(P, apollo_inputs, functionality)
+  
+  ### Prepare and return outputs of function
+  P = apollo_prepareProb(P, apollo_inputs, functionality)
+  return(P)
+}
+
+# ################################################################# #
+#### MODEL ESTIMATION                                            ####
+# ################################################################# #
+
+model = apollo_estimate(apollo_beta, apollo_fixed, apollo_probabilities, apollo_inputs)
+
+# ################################################################# #
+#### MODEL OUTPUTS                                               ####
+# ################################################################# #
+
+# ----------------------------------------------------------------- #
+#---- FORMATTED OUTPUT (TO SCREEN)                               ----
+# ----------------------------------------------------------------- #
+
+apollo_modelOutput(model)
+
+# ----------------------------------------------------------------- #
+#---- FORMATTED OUTPUT (TO FILE, using model name)               ----
+# ----------------------------------------------------------------- #
+
+#apollo_saveOutput(model)
