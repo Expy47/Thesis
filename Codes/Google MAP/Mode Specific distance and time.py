@@ -4,7 +4,7 @@ import time
 from datetime import datetime, timedelta
 
 # Replace with your actual Google Maps API key
-API_KEY = 'AIzaSyCeEKS8yluVIAFWkO_DZwcs0oVJqovSRHc'  # Replace with your actual Google Maps API key
+API_KEY = 'API_KEY'  # Replace with your actual Google Maps API key
 gmaps = googlemaps.Client(key=API_KEY)
 
 # Load the Excel file containing origins, destinations, and timestamps
@@ -155,3 +155,4 @@ output_file = r'G:\4-2\CE-400\Google MAP\results_location_egress_Time.xlsx'  # S
 results_df.to_excel(output_file, index=False)
 
 print(f'Results saved to {output_file}')
+
